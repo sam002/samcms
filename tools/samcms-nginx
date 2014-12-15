@@ -1,0 +1,27 @@
+server {
+	listen 7770;
+		server_name 10.0.0.2 127.0.0.1 localhost;
+
+	access_log /var/log/nginx/debug/access.log;
+	error_log  /var/log/nginx/debug/error.log  error;
+
+	location @default
+	{
+		fastcgi_pass 127.0.0.1:7777;
+		include /etc/nginx/fastcgi_params;
+	}
+
+	location ~* ^/.+\.(png|jpg|gif|jpeg|ico)$ {
+		root /var/www/samcms/image;
+		expires 1d;
+		if (-f $request_filename) {
+			break;
+		}
+	}
+
+	location / {
+		try_files $uri @default;
+	}
+
+}
+
