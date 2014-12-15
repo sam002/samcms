@@ -1,9 +1,9 @@
 #/etc/default/smcms
 #SAMCMS environments for postgresql
 PGPASSFILE=~/.pgpass
-SAMCMS_DB_NAME=design11
+SAMCMS_DB_NAME=samcms
 SAMCMS_DB_USER=smcms
-SAMCMS_DB_PASSWORD=qwerty
+SAMCMS_DB_PASSWORD=samcms
 SAMCMS_DB_ADDRESS=127.0.0.1
 
 #SAMCMS environments for FCGI-connections

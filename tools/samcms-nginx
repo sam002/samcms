@@ -12,7 +12,7 @@ server {
 	}
 
 	location ~* ^/.+\.(png|jpg|gif|jpeg|ico)$ {
-		root /var/www/samcms/image;
+		root /var/www/samcms/content/image;
 		expires 1d;
 		if (-f $request_filename) {
 			break;

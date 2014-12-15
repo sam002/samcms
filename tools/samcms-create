@@ -7,7 +7,7 @@ fi
 DB_USER_NAME=${SAMCMS_DB_USER}`test ! -z ${SAMCMS_DB_USER}||echo "smcms"`
 echo "db user = ${DB_USER_NAME}, pwd=${PWD}"
 DB_HOST=${SAMCMS_DB_ADDRESS}`test ! -z ${SAMCMS_DB_ADDRESS}||echo "127.0.0.1"`
-DB_DB_NAME=${SAMCMS_DB_NAME}`test ! -z ${SAMCMS_DB_NAME}||echo "design11"`
+DB_DB_NAME=${SAMCMS_DB_NAME}`test ! -z ${SAMCMS_DB_NAME}||echo "samcms"`
 
 CMD="psql -h ${DB_HOST} -U ${DB_USER_NAME} -d ${DB_DB_NAME} -f"
 
@@ -50,12 +50,12 @@ inbase() {
 }
 
 help() {
-	echo -e "  -h\tfor help"
-	echo -e "  -i\tinstall [modules name from ./modules] "
-	echo -e "    \tdefault base modules install from ./modules/base"
+	echo -e "  -h \t for help"
+	echo -e "  -i \t install [modules name from ./modules] "
+	echo -e "     \t default base modules install from ./modules/base"
 	echo -ne "    available modules: "
 	ls ./modules
-	echo -e "  -v\trelease info and about smcms"
+	echo -e "  -v \t release info and about smcms"
 }
 
 if [ -z $1 ]; then

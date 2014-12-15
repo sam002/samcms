@@ -18,55 +18,55 @@
 #define DEBUG
 //#undef DEEBUG
 
-/* Настройки */
+/* CONFIGURE */
 #define VERSION			"samcms version 0.1"
-#define CONNINFO		"dbname='samcms' user='samcms' password='qwerty' hostaddr='127.0.0.1' port='5432'"	// параметры подключения
-#define DEFAULT_SECTION_NAME	NULL			// Имя сигнального элемента
-#define DEBUG						// включить отладку
+#define CONNINFO		"dbname='samcms' user='samcms' password='qwerty' hostaddr='127.0.0.1' port='5432'"	// connection settings
+#define DEFAULT_SECTION_NAME	NULL			// Name signaling element
+#define DEBUG						// enable debug
 
 
-/******************** ГЛОАЛЬНЫЕ ПЕРЕМЕННЫЕ ********************/
+/****************************** GLOBAL VARIABLES ******************************/
 
-/* Общие переменные для postgres */
+/* Common variables for postgres */
 PGconn *conn;
 PGresult *res;
 
 typedef struct commands
 {
-	const char *name;		/* имя функции */
-	const char *cert;		/* сертификат модуля */
-}commands; //структура для команд
+	const char *name;		/* function name */
+	const char *cert;		/* certificate module */
+}commands; // structure of commands
 
 typedef struct section{
-	char *name;			/* Имя секции */
-	char *params;		/* Количество параметров */
-	char *doctype;		/* Тип документа ("text/xml" по умолчании) */
-	char *param_type;	/* Тип параметров из окружения ("QUERY_STRING" по умолчании) */
-	char *templt_path;	/* Шаблон пути ("/" - корень по умолчании) */
-	struct section *next;		/* Указатель на следующую структуру */
-	struct commands *commands;	/* Указатель на массив переменных из секции */
-} section; //структура для команд
+	char *name;			/* Section name */
+	char *params;		/* Count of parameters */
+	char *doctype;		/* Document type (default is "text/xml") */
+	char *param_type;	/* Type of parametrs from envirement (default is "QUERY_STRING") */
+	char *templt_path;	/* Path template ("/" - default is root) */
+	struct section *next;		/* Pointer on next section */
+	struct commands *commands;	/* Pointer on array commands from section */
+} section; // structure of commands
 
 volatile section *section_get;
 volatile section *section_post;
 
-//глобальный сборщик мусора
+//Glogal GC
 void **garb = NULL;
 
-/* конец ***************************** ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ */
+/* end ***************************************************** GLOBAL VARIABLES */
 
 
 
-/******************** ОБЪЯВЛЕНИЕ ФУНКЦИЙ ********************/
+/**************************** FUNCTION DECLARATION ****************************/
 void add_garb(void* ptr);
 int initialise(const char *conninfo);
 void free_garb(void);
 char from_hex(char ch);
-/* конец ******************************* ОБЪЯВЛЕНИЕ ФУНКЦИЙ */
+/* end ************************************************ FUNCTION DECLARATION  */
 
 
 
-/******************** ПРЕВЕНТИВНОЕ КЕШИРОВАНИЕ ЗАПРОСОВ ********************/
+/************************ PREVENTIVE CACHING REQUESTS *************************/
 /*
 * Отдельный поток для кеширования запросов. Сохраняет соответствие URI и
 * шаблона пути модуля. При повторном обращении по одному и тому же пути
@@ -74,12 +74,12 @@ char from_hex(char ch);
 * Для оптимизации составляем дерево, ako индексирование.
 */
 
-//временная структура, обрабатываемая отдельным потоком. Преобразуется в дерево.
+//temp structure, processed by a separate thread. Is transformed into a tree.
 typedef struct uricache
 {
-	const char *name;		/* имя функции */
-	const char *path;		/* путь в URI запросе */
-}uricache; //структура кеша
+	const char *name;		/* function name */
+	const char *path;		/* path in URI query */
+}uricache; // cache structure
 
 char* search_module(const char *uri_path){
 	char* module_name = NULL;
@@ -95,11 +95,11 @@ char* search_module(const char *uri_path){
 	string = malloc(strlen(uri_path));
 	strcat(string, uri_path);
 	
-	//Если путь корректный, то пробежимся по структуре модулей, Сравнивая с шаблоном
+	// If path correct search in structure array, compare with template
 		int *tmp = (int *)(&section_get[0]);
 		do
 		{
-			//Проверка корректности регулярного выражения
+			//Check regular expression
 			if(NULL == section_get->templt_path || 0 != regcomp (&preg, section_get->templt_path, 0))
 			{
 				//TODO Выключить некорректный модуль, передать предупреждение.
@@ -111,7 +111,7 @@ char* search_module(const char *uri_path){
 				return module_name;
 				break;
 			}
-			//Сместим указатель на один элемент вперёд, чтобы не вылетать при первой же итерации
+			// Shift the pointer to one element forward so as not to depart at the first iteration
 			section_get=section_get->next;
 		} while((int *)(&section_get[0]) != tmp);
 	}
@@ -119,12 +119,12 @@ char* search_module(const char *uri_path){
 	return module_name;
 }
 
-/* конец ******************************* ОБЪЯВЛЕНИЕ ФУНКЦИЙ */
+/* end ****************************************** PREVENTIVE CACHING REQUESTS */
 
 
 
-/********************   КОД ОСНОВНОЙ ПРОГРАММЫ   ********************/
-// Наполнение главной
+/**************************   MAIN PROGRAM CODE   *****************************/
+// Content of index page
 void contr_default(char* uri_path, char* cookie_str) {
 	char *paramvalues[2];
 	paramvalues[0] = uri_path;
@@ -489,4 +489,4 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-/* конец *******************************   КОД  ПРОГРАММЫ   */
+/* end ************************************************   MAIN PROGRAM CODE   */
