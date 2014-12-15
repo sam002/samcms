@@ -2,7 +2,7 @@ CC=gcc
 TARGET=$(shell basename `pwd`)
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:%.c=%.o)
-PREFIX="./debbug/"
+PREFIX=./develop
 
 CFLAGS += -O3 -std=c99 -I/usr/include/postgresql -L/usr/lib/postgresql/9.[2,3,4]/lib -Wall
 LDFLAGS += -lpq -lfcgi
@@ -22,23 +22,23 @@ install:
 	cp -r ./modules/ $(PREFIX)/usr/share/samcms/
 	chmod -R 755 $(PREFIX)/usr/share/samcms/
 	
-	./tools/samcms-create ./
-	sudo /etc/init.d/samcms start
+	$(PREFIX)/usr/bin/samcms-create $(PREFIX)/
+	sudo $(PREFIX)/etc/init.d/samcms start
 
 uninstall:
-	/etc/init.d/samcms stop || killall samcms-index
+	$(PREFIX)/etc/init.d/samcms stop || killall samcms-index
 	rm -rf $(PREFIX)/usr/bin/samcms $(PREFIX)/usr/bin/index $(PREFIX)/usr/bin/samcms-create $(PREFIX)/etc/default/samcms $(PREFIX)/etc/init.d/samcms $(PREFIX)/usr/share/samcms
 
-all: $(TARGET) index
+#all: $(TARGET) index
 
 $(OBJECTS): $(SOURCES)
 
 $(TARGET): $(OBJECTS)
 
-index: index.o
-	$(CC) index.o $(LDFLAGS) $(CFLAGS) -o index
+#index: index.o
+#	$(CC) index.o $(LDFLAGS) $(CFLAGS) -o index
 
 clean:
-	$(RM) $(OBJECTS) $(TARGET)
+	$(RM) -r $(OBJECTS) $(TARGET)
 
 .PHONY: all clean

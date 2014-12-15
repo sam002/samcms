@@ -1,13 +1,13 @@
-#/etc/default/smcms
+#/etc/default/samcms
 #SAMCMS environments for postgresql
 PGPASSFILE=~/.pgpass
 SAMCMS_DB_NAME=samcms
-SAMCMS_DB_USER=smcms
+SAMCMS_DB_USER=samcms
 SAMCMS_DB_PASSWORD=samcms
 SAMCMS_DB_ADDRESS=127.0.0.1
 
 #SAMCMS environments for FCGI-connections
-SAMCMS_SCRIPT=/usr/bin/smcms-index
+SAMCMS_SCRIPT=/usr/bin/samcms-index
 SAMCMS_SCRIPT_OPTIONS="-d ${SAMCMS_DB_NAME} -u ${SAMCMS_DB_USER} -w ${SAMCMS_DB_PASSWORD} -a ${SAMCMS_DB_ADDRESS}"
 SAMCMS_ADDR=127.0.0.1
 SAMCMS_PORT=7777

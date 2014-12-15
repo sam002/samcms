@@ -1,26 +1,27 @@
 #!/bin/bash
-PREFIX= #`pwd | awk -F /usr/bin '{print($1)}'`
-if [ -f ${PREFIX}/etc/default/smcms ]; then
-	. ${PREFIX}/etc/default/smcms
+PREFIX=`echo ${BASH_SOURCE[0]} | awk -F /usr/bin '{print($1)}'`
+if [ -f ${PREFIX}/etc/default/samcms ]; then
+	. ${PREFIX}/etc/default/samcms
 fi
 
-DB_USER_NAME=${SAMCMS_DB_USER}`test ! -z ${SAMCMS_DB_USER}||echo "smcms"`
-echo "db user = ${DB_USER_NAME}, pwd=${PWD}"
+DB_USER_NAME=${SAMCMS_DB_USER}`test ! -z ${SAMCMS_DB_USER}||echo "postgres"`
+DB_DB_PASSWORD=${SAMCMS_DB_NAME}`test ! -z ${SAMCMS_DB_NAME}||read -p 'Enter password for postgres user' -r -s`
+echo "DB: user=${DB_USER_NAME}, password=${DB_DB_PASSWORD}"
 DB_HOST=${SAMCMS_DB_ADDRESS}`test ! -z ${SAMCMS_DB_ADDRESS}||echo "127.0.0.1"`
 DB_DB_NAME=${SAMCMS_DB_NAME}`test ! -z ${SAMCMS_DB_NAME}||echo "samcms"`
 
-CMD="psql -h ${DB_HOST} -U ${DB_USER_NAME} -d ${DB_DB_NAME} -f"
+CMD="psql -h ${DB_HOST} -U ${DB_USER_NAME} -w ${SAMCMS_DB_PASSWORD} -d ${DB_DB_NAME} -f"
 
-if ! [ -d ./log ];
+if ! [ -d ${PWD}/log ];
 then
-	mkdir ./log
+	mkdir ${PWD}/log
 else
-	if [ -e ./log/install_log ]; then
-		rm ./log/install_log
+	if [ -e ${PWD}/log/install_log ]; then
+		rm ${PWD}/log/install_log
 	fi
-	touch ./log/install_log
-	test -d ./log/archive || mkdir ./log/archive
-	mv ./log/install_* ./log/archive
+	touch ${PWD}/log/install_log
+	test -d ${PWD}/log/archive || mkdir ${PWD}/log/archive
+	mv ${PWD}/log/install_* ${PWD}/log/archivesc
 fi
 
 inbase() {
@@ -36,12 +37,13 @@ inbase() {
 	do
 		TMP_STR=`ls -1 $1 | head -$I | tail -1`
 		$CMD $1/$TMP_STR >> ./log/install_log 2>&1
-		ERROR_CHCK=`cat ./log/install_log | grep ERROR | wc -l;`
+		ERROR_CHCK=`cat ${PWD}/log/install_log | grep ERROR | wc -l;`
 		echo -e "\t $I) $TMP_STR"
 		if [ $ERROR_CHCK -ne 0 ];  then
 			echo "error: SQL not correct!"
-			cat ./log/install_log | sed -e '/./{H;$!d;}' -e 'x;/ERROR/!d;'
-			mv ./log/install_log ./log/install_ERR_`date +%Y%m%d_%T`
+			cat ${PWD}/log/install_log | sed -e '/./{H;$!d;}' -e 'x;/ERROR/!d;'
+			mv ${PWD}/log/install_log ${PWD}/log/install_ERR_`date +%Y%m%d_%T`
+                        loginfo ${PWD}/log/install_ERR_`date +%Y%m%d_%T
 			exit 1;
 		fi
 		echo -e "\n" >> ./log/install_log
@@ -54,8 +56,12 @@ help() {
 	echo -e "  -i \t install [modules name from ./modules] "
 	echo -e "     \t default base modules install from ./modules/base"
 	echo -ne "    available modules: "
-	ls ./modules
-	echo -e "  -v \t release info and about smcms"
+	ls ${PWD}/modules
+	echo -e "  -v \t release info and about samcms"
+}
+
+loginfo() {
+    echo -e "See information about craete process in logfile: $1"
 }
 
 if [ -z $1 ]; then
@@ -66,13 +72,14 @@ fi
 psql -h ${DB_HOST} -U ${DB_USER_NAME} -d postgres -c "DROP DATABASE ${DB_DB_NAME}"
 psql -h $DB_HOST -U $DB_USER_NAME -d postgres -c "CREATE DATABASE ${DB_DB_NAME}"
 
-inbase ${PREFIX}/usr/share/smcms/modules/tables
-inbase ${PREFIX}/usr/share/smcms/modules/base
-inbase ${PREFIX}/usr/share/smcms/modules/doc
-#inbase ./modules/tables
-#inbase ./modules
+inbase ${PREFIX}/usr/share/samcms/modules/tables
+inbase ${PREFIX}/usr/share/samcms/modules/base
+inbase ${PREFIX}/usr/share/samcms/modules/doc
+#inbase ${PWD}/modules/tables
+#inbase ${PWD}/modules
 
-mv ./log/install_log ./log/install_`date +%Y%m%d_%T`
+mv ${PWD}/log/install_log ${PWD}/log/install_`date +%Y%m%d_%T`
+loginfo ${PWD}/log/install_`date +%Y%m%d_%T
 
 exit 0;
 
