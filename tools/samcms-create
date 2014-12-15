@@ -4,32 +4,33 @@ if [ -f ${PREFIX}/etc/default/samcms ]; then
 	. ${PREFIX}/etc/default/samcms
 fi
 
-DB_USER_NAME=${SAMCMS_DB_USER}`test ! -z ${SAMCMS_DB_USER}||echo "postgres"`
-DB_DB_PASSWORD=${SAMCMS_DB_NAME}`test ! -z ${SAMCMS_DB_NAME}||read -p 'Enter password for postgres user' -r -s`
-echo "DB: user=${DB_USER_NAME}, password=${DB_DB_PASSWORD}"
-DB_HOST=${SAMCMS_DB_ADDRESS}`test ! -z ${SAMCMS_DB_ADDRESS}||echo "127.0.0.1"`
-DB_DB_NAME=${SAMCMS_DB_NAME}`test ! -z ${SAMCMS_DB_NAME}||echo "samcms"`
+DB_USER_NAME=${SAMCMS_DB_USER}`test ! -z ${SAMCMS_DB_USER}||echo "postgres"`;
+#DB_DB_PASSWORD=${SAMCMS_DB_PASSWORD}`test ! -z ${SAMCMS_DB_PASSWORD}||read -p "Enter password for postgres user[Enter for continue]: " -s -e`;
+DB_DB_PASSWORD=${SAMCMS_DB_PASSWORD}`test ! -z ${SAMCMS_DB_PASSWORD}||echo "POSTGRES"`;
+echo -e "DB: user=${DB_USER_NAME}, password=${DB_DB_PASSWORD}";
+DB_HOST=${SAMCMS_DB_ADDRESS}`test ! -z ${SAMCMS_DB_ADDRESS}||echo "127.0.0.1"`;
+DB_DB_NAME=${SAMCMS_DB_NAME}`test ! -z ${SAMCMS_DB_NAME}||echo "samcms"`;
 
-CMD="psql -h ${DB_HOST} -U ${DB_USER_NAME} -w ${SAMCMS_DB_PASSWORD} -d ${DB_DB_NAME} -f"
+CMD="psql -h ${DB_HOST} -U ${DB_USER_NAME} -w ${DB_DB_PASSWORD} -d ${DB_DB_NAME} -f"
 
-if ! [ -d ${PWD}/log ];
-then
+if ! [ -d ${PWD}/log ]; then
 	mkdir ${PWD}/log
-else
+fi
+
+loginit() {
 	if [ -e ${PWD}/log/install_log ]; then
 		rm ${PWD}/log/install_log
 	fi
 	touch ${PWD}/log/install_log
 	test -d ${PWD}/log/archive || mkdir ${PWD}/log/archive
-	mv ${PWD}/log/install_* ${PWD}/log/archivesc
-fi
+	mv ${PWD}/log/install_* ${PWD}/log/archive
+}
 
 inbase() {
 	if ! [ -d $1 ]; then
 		echo "error: $1 not dir!"
 		exit 1;
-	fi
-	
+	fi	
 	NUM_FILES=`ls -1 $1 | grep ".sql" | wc -l`;
 	I=1;
 	echo "Add from $1:"
@@ -42,8 +43,8 @@ inbase() {
 		if [ $ERROR_CHCK -ne 0 ];  then
 			echo "error: SQL not correct!"
 			cat ${PWD}/log/install_log | sed -e '/./{H;$!d;}' -e 'x;/ERROR/!d;'
-			mv ${PWD}/log/install_log ${PWD}/log/install_ERR_`date +%Y%m%d_%T`
-                        loginfo ${PWD}/log/install_ERR_`date +%Y%m%d_%T
+			mv ${PWD}/log/install_log ${PWD}/log/install_ERR_`date +%Y%m%d_%T`;
+                        loginfo ${PWD}/log/install_ERR_`date +%Y%m%d_%T`;
 			exit 1;
 		fi
 		echo -e "\n" >> ./log/install_log
@@ -69,6 +70,9 @@ if [ -z $1 ]; then
 	exit 1;
 fi
 
+
+loginit
+
 psql -h ${DB_HOST} -U ${DB_USER_NAME} -d postgres -c "DROP DATABASE ${DB_DB_NAME}"
 psql -h $DB_HOST -U $DB_USER_NAME -d postgres -c "CREATE DATABASE ${DB_DB_NAME}"
 
@@ -82,4 +86,3 @@ mv ${PWD}/log/install_log ${PWD}/log/install_`date +%Y%m%d_%T`
 loginfo ${PWD}/log/install_`date +%Y%m%d_%T
 
 exit 0;
-
