@@ -5,8 +5,7 @@ if [ -f ${PREFIX}/etc/default/samcms ]; then
 fi
 
 DB_USER_NAME=${SAMCMS_DB_USER}`test ! -z ${SAMCMS_DB_USER}||echo "postgres"`;
-#DB_DB_PASSWORD=${SAMCMS_DB_PASSWORD}`test ! -z ${SAMCMS_DB_PASSWORD}||read -p "Enter password for postgres user[Enter for continue]: " -s -e`;
-DB_DB_PASSWORD=${SAMCMS_DB_PASSWORD}`test ! -z ${SAMCMS_DB_PASSWORD}||echo "POSTGRES"`;
+DB_DB_PASSWORD=${SAMCMS_DB_PASSWORD}`test ! -z ${SAMCMS_DB_PASSWORD}||read -p "Enter password for user ${DB_USER_NAME}[Enter]" -s -e`;
 echo -e "DB: user=${DB_USER_NAME}, password=${DB_DB_PASSWORD}";
 DB_HOST=${SAMCMS_DB_ADDRESS}`test ! -z ${SAMCMS_DB_ADDRESS}||echo "127.0.0.1"`;
 DB_DB_NAME=${SAMCMS_DB_NAME}`test ! -z ${SAMCMS_DB_NAME}||echo "samcms"`;
@@ -70,11 +69,25 @@ if [ -z $1 ]; then
 	exit 1;
 fi
 
-
-loginit
-
-psql -h ${DB_HOST} -U ${DB_USER_NAME} -d postgres -c "DROP DATABASE ${DB_DB_NAME}"
-psql -h $DB_HOST -U $DB_USER_NAME -d postgres -c "CREATE DATABASE ${DB_DB_NAME}"
+PS3="Refresh DB ${DB_DB_NAME}? ";
+select DBRECREATE in "no" "yes" "quit"; do
+    case $DBRECREATE in
+        quit )
+            echo "Exit."
+            break
+            ;;
+        yes )
+            psql -h ${DB_HOST} -U postgres -c "DROP DATABASE ${DB_DB_NAME}";
+            psql -h ${DB_HOST} -U postgres -c "CREATE DATABASE ${DB_DB_NAME}";
+            break
+            ;;
+        * )
+            echo "You picked $DBRECREATE ($REPLY)"
+            break
+            ;;
+    esac
+  break
+done
 
 inbase ${PREFIX}/usr/share/samcms/modules/tables
 inbase ${PREFIX}/usr/share/samcms/modules/base
