@@ -16,8 +16,11 @@ extern "C" {
 #include <fcgi_stdio.h>		/* fcgi library; */
 #include <stdio.h>		/* printf, fprintf */
 #include <stdlib.h>		/* getenv, malloc */
-
-
+#include <syslog.h>		/* syslog */
+#include <libpq-fe.h>		/* PQ-functions */
+#include <string.h>		/* strlen */
+#include "config.h"
+    
 typedef struct commands
 {
 	const char *name;		/* function name */
@@ -33,6 +36,20 @@ typedef struct section{
 	struct section *next;		/* Pointer on next section */
 	struct commands *commands;	/* Pointer on array commands from section */
 } section; // structure of commands
+
+
+/****************************** GLOBAL VARIABLES ******************************/
+
+volatile section *section_get;
+volatile section *section_post;
+
+/* Common variables for postgres */
+PGconn *conn;
+PGresult *res;
+
+/* end ***************************************************** GLOBAL VARIABLES */
+
+
 
 /**************************** FUNCTION DECLARATION ****************************/
 

@@ -5,8 +5,9 @@
  * Created on 19 Dec 2014
  */
 
-#include "controllers.h"
+
 #include <regex.h>
+#include "controllers.h"
 
 /**********************   CONTROLLERS PROGRAM CODE   **************************/
 
@@ -59,7 +60,6 @@ void contrDebug(const char* title, const char* data) {
 			<hr><center>%s</center>\
                         <hr><footer>%s</footerr></body>\
 			</html>", title, data, VERSION);
-    return 0;
 }
 
 // Content of admin panel
@@ -103,7 +103,7 @@ void contrModule (volatile struct section *section, char *query_string) {
 
 	command = malloc(strlen("SELECT * FROM ($1);") + strlen(section->name) + 1);
 	sprintf(command, "SELECT * FROM %s($1);", section->name);
-	add_garb(command);
+	//add_garb(command);
 	
 	syslog(LOG_DEBUG, "call:\"%s\"", command);
 	//Делать вызовы обработки
@@ -119,6 +119,5 @@ void contrModule (volatile struct section *section, char *query_string) {
 	}
 	PQclear(res);
 }
-
 
 /* end *****************************************   CONTROLLERS PROGRAM CODE   */

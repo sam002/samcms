@@ -5,43 +5,25 @@
  * Created on 11 Jul 2012
  */
 
-#include "index.h"
 //FIXME
 #include <sys/utsname.h>	/* uname */
 #include <getopt.h>
 
-#define DEBUG
+#include "index.h"
+
+//#define DEBUG
 //#undef DEEBUG
 
-/* CONFIGURE */
-#define VERSION			"samcms version 0.1"
-#define CONNINFO		"dbname='samcms' user='samcms' password='qwerty' hostaddr='127.0.0.1' port='5432'"	// connection settings
-#define DEFAULT_SECTION_NAME	NULL			// Name signaling element
-#define DEBUG						// enable debug
+/**************************** FUNCTION DECLARATION ****************************/
+int bindFCGI(void);
+int initialise(const char *conninfo);
+void free_garb(void);
+char from_hex(char ch);
 
-
-/****************************** GLOBAL VARIABLES ******************************/
-
-/* Common variables for postgres */
-PGconn *conn;
-PGresult *res;
-
-volatile section *section_get;
-volatile section *section_post;
 
 //Glogal GC
 void **garb = NULL;
 
-/* end ***************************************************** GLOBAL VARIABLES */
-
-
-
-/**************************** FUNCTION DECLARATION ****************************/
-int bindFCGI(void);
-void add_garb(void* ptr);
-int initialise(const char *conninfo);
-void free_garb(void);
-char from_hex(char ch);
 /* end ************************************************ FUNCTION DECLARATION  */
 
 
@@ -51,14 +33,21 @@ int bindFCGI() {
     char *query_type = NULL;
     char *query_string = NULL;
     char *request_uri = NULL;
-    
+    char *request_cookies = NULL;
+
     while (FCGI_Accept() >= 0) {
 
         query_type = getenv("REQUEST_METHOD");
-            query_string = getenv("QUERY_STRING");
-            request_uri = getenv("DOCUMENT_URI");
+        query_string = getenv("QUERY_STRING");
+        request_uri = getenv("DOCUMENT_URI");
+        request_cookies = getenv("COOKIE_STRING");
+
+        // printf("<!--SUCCESS-->\n\n");
+         
         //Processing query
-        routeQuery(query_type, request_uri, query_string);
+        if(routeQuery(query_type, request_uri, (char *) &query_string, (char *)request_cookies) != 1){
+            printf("<!--SUCCESS-->\n\n");
+        }
 
     }
     return 1;

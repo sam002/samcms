@@ -9,11 +9,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-# include <grp.h>
-# include <pwd.h>
+#include <grp.h>
+#include <pwd.h>
 
 #ifdef HAVE_GETOPT_H
-# include <getopt.h>
+#include <getopt.h>
 #endif
 
 #define FCGI_LISTENSOCK_FILENO 0

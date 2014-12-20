@@ -16,14 +16,16 @@ extern "C" {
 #include <sys/types.h>		/* getpwnam, setuid */
 #include <pwd.h>		/* getpwnam */
 #include <unistd.h>		/* setuid */
-#include <libpq-fe.h>		/* PQ-functions */
-#include <syslog.h>		/* syslog */
 #include <sys/prctl.h>		/* prctl */
     
 #include "cache.h"
 #include "controllers.h"
 #include "router.h"
 #include "views.h"
+#include "config.h"
+    
+
+void add_garb(void* ptr);
 
 #ifdef	__cplusplus
 }

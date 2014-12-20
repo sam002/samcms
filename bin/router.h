@@ -27,17 +27,18 @@ extern "C" {
 #include <libpq-fe.h>		/* PQ-functions */
 #include <syslog.h>		/* syslog */
 #include <sys/prctl.h>		/* prctl */
+#include "config.h"
     
 // Set temporary structure for all pqrqmetrs
-typedef struct query_params{
+typedef struct keyvalue{
     char *name;
     char *value;
-} query_params;
+} keyvalue;
 
 /**************************** FUNCTION DECLARATION ****************************/
 
-int routeQuery(char *type, char *path, query_params *query);
-query_params* parseQeryString(char* query_string);
+int routeQuery(char *type, char *path, char *query, char *cookies);
+keyvalue* parseKeyValueString(char* string, char delimiter_key, char delimiter_value);
 
 /* end ************************************************ FUNCTION DECLARATION  */
 
@@ -46,4 +47,3 @@ query_params* parseQeryString(char* query_string);
 #endif
 
 #endif	/* ROUTER_H */
-

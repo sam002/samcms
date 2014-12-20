@@ -8,18 +8,6 @@
 #include "router.h"
 #include "controllers.h"
 
-/****************************** GLOBAL VARIABLES ******************************/
-
-volatile section *section_get;
-volatile section *section_post;
-
-//Glogal GC
-void **garb = NULL;
-
-/* end ***************************************************** GLOBAL VARIABLES */
-
-
-
 /**************************** FUNCTION DECLARATION ****************************/
 
 char from_hex(char ch);
@@ -32,18 +20,19 @@ char *urldecode(char *str);
 
 /********************************** ROUTER CODE *******************************/
 
-int routeQuery(char *type, char *path, query_params *query){
-    char *query_string = NULL;
+int routeQuery(char *type, char *path, char *query, char *cookies){
     char *request_uri = NULL;
+    char *query_string = NULL;
+    char *query_cookies = NULL;
     
         // Parse GET
-        if (strcasecmp(getenv("REQUEST_METHOD"), "GET") == 0) {
+       if (strcasecmp(type, "GET") == 0) {
             query_string = getenv("QUERY_STRING");
             request_uri = getenv("DOCUMENT_URI");
             request_uri++;
             //Processing query
             printf("TEST_2, %s and %s\n", request_uri, query_string);
-            contrDebug(request_uri, query_string);
+            //contrDebug(request_uri, query_string);
             return 0;
         }
     return 1;
@@ -125,16 +114,16 @@ char *urldecode(char *str) {
 	return buf;
 }
 
-query_params* parseQueryString(char* query_string){
-    const char *delimetr_key_value="=&";
+keyvalue* parseKeyValueString(char* string, char delimiter_key, char delimiter_value){
+    const char delimetr_key_value[]={delimiter_key, delimiter_value, '\0'};
     int max_params = 1024;
-    query_params *res;
+    keyvalue *res;
         
-    if (query_string != NULL && strlen(query_string) > 0) {
+    if (string != NULL && strlen(string) > 0) {
 
-        char *pt = strtok(query_string, delimetr_key_value);
+        char *pt = strtok(string, delimetr_key_value);
 
-        res = (query_params*) malloc(sizeof (struct query_params));
+        res = (keyvalue*) malloc(sizeof (struct keyvalue));
         res[0].name = (char *) malloc(strlen(pt) + 1);
         strcpy(res[0].name, pt);
         res[0].value = (char *) malloc(strlen(pt) + 1);
@@ -143,7 +132,7 @@ query_params* parseQueryString(char* query_string){
 
          pt = strtok(NULL, delimetr_key_value);
         for (int i = 0; pt != NULL && i < (max_params - 1); i++, pt = strtok(NULL, delimetr_key_value)) {
-            res = (query_params*) realloc(res, sizeof (struct query_params)*(2 + i));
+            res = (keyvalue*) realloc(res, sizeof (struct keyvalue)*(2 + i));
             res[i+1].name = (char *) malloc(strlen(pt) + 1);
             strcpy(res[i+1].name, pt);
             res[i+1].value = (char *) malloc(strlen(pt) + 1);
