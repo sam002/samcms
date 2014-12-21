@@ -33,7 +33,7 @@ make
 ```
 For last step run in debug mode
 ```bash
-./develop/usr/bin/samcms -n -a 127.0.0.1 -p 7777 -u www-data -g www-data -P /var/run/samcms.pid \
+./develop/usr/bin/samcms -n -a 127.0.0.1 -p 7777 -u www-data -g www-data \
 -- ./develop/usr/bin/samcms-index -d samcms -u samcms -w samcms -a 127.0.0.1
 ```
 
