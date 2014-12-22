@@ -1,5 +1,5 @@
 #samcms
-Web-CMS for postgresql. Written in pgslq and C.
+Web-CMS for postgresql. Written in pgsql and C.
 
 ##Preparations of code in progress...
 
