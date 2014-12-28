@@ -525,7 +525,6 @@ int main(int argc, char **argv) {
 
 		/* Change group before chroot, when we have access
 		 * to /etc/group*/
-		 
 		if (gid != 0) {
 			setgid(gid);
 			setgroups(0, NULL);
@@ -542,6 +541,5 @@ int main(int argc, char **argv) {
 		if ( -1 == (fcgi_fd = bind_socket(addr, port, unixsocket, 0, 0, sockmode)))
 			return -1;
 	}
-
 	return fcgi_spawn_connection(fcgi_app_argv, fcgi_fd, fork_count, pid_fd, nofork);
 }

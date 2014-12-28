@@ -14,6 +14,8 @@
 //#define DEBUG
 //#undef DEEBUG
 
+
+
 /**************************** FUNCTION DECLARATION ****************************/
 int bindFCGI(void);
 int initialise(const char *conninfo);
@@ -25,6 +27,7 @@ char from_hex(char ch);
 void **garb = NULL;
 
 /* end ************************************************ FUNCTION DECLARATION  */
+
 
 
 /**************************   MAIN PROGRAM CODE   *****************************/
@@ -40,14 +43,15 @@ int bindFCGI() {
         query_type = getenv("REQUEST_METHOD");
         query_string = getenv("QUERY_STRING");
         request_uri = getenv("DOCUMENT_URI");
-        request_cookies = getenv("COOKIE_STRING");
+        request_cookies = getenv("HTTP_COOKIE");
+        
+        printf("X-Powered-by:%s",VERSION);
 
-        // printf("<!--SUCCESS-->\n\n");
-         
         //Processing query
-        if(routeQuery(query_type, request_uri, (char *) &query_string, (char *)request_cookies) != 1){
+        routeQuery(query_type, request_uri, query_string, request_cookies);
+        /*if(routeQuery(query_type, request_uri, (char *) &query_string, (char *)&request_cookies) != 1){
             printf("<!--SUCCESS-->\n\n");
-        }
+        }*/
 
     }
     return 1;
@@ -72,8 +76,7 @@ int initialise(const char *conninfo)
 		return ++err;
 	}
 	/* При удачном соединении запрашиваем массив всех возможных функций обработки*/
-	else
-	{
+	else {
 		{
 			prctl(PR_GET_NAME, tmp_buf);
 			paramvalues[0] = (char*)malloc(strlen(tmp_buf)+1);
@@ -113,8 +116,7 @@ int initialise(const char *conninfo)
 		
 		num = PQntuples(init_res);
 
-		if(PQresultStatus(init_res)==PGRES_TUPLES_OK && init_res != NULL)
-		{
+		if(PQresultStatus(init_res)==PGRES_TUPLES_OK && init_res != NULL) {
 		/* .next использовать для работы с многими потоками */
 			section_get = (section*)malloc(sizeof(struct section)*(num+1));
 			add_garb((void *)section_get);
@@ -127,8 +129,7 @@ int initialise(const char *conninfo)
 			section_get[0].doctype = NULL;
 			section_get[0].templt_path = "/";
 			section_get[0].next = (section*)&(section_get[0]);
-			for(i = 1; i <= num; i++)
-			{
+			for(i = 1; i <= num; i++) {
 				// получение имени структуры
 				section_get[i].name = PQgetvalue(init_res, i-1, 0);
 				// заполнение структур переменных
@@ -142,13 +143,10 @@ int initialise(const char *conninfo)
 			}
 			// если в файле есть описание структур, то последняя структура должна замыкаться на сигнальную
 			// получаем кольцо из указателей, что поможет избежать ошибок сегментирования
-			if(num > 0)
-			{
+			if(num > 0) {
 				section_get[i-1].next = (section*)&(section_get[0]);
 				section_get = section_get->next;
-			}
-			else
-			{
+			} else {
 				fputs("cann't find structure\n", stderr);
 			}
 		}

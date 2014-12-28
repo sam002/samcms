@@ -28,12 +28,7 @@ extern "C" {
 #include <syslog.h>		/* syslog */
 #include <sys/prctl.h>		/* prctl */
 #include "config.h"
-    
-// Set temporary structure for all pqrqmetrs
-typedef struct keyvalue{
-    char *name;
-    char *value;
-} keyvalue;
+
 
 /**************************** FUNCTION DECLARATION ****************************/
 

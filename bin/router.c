@@ -5,64 +5,86 @@
  * Created on 19 Dec 2014
  */
 
-#include "router.h"
+
 #include "controllers.h"
+#include "router.h"
+
+#define TYPE_UNDEFINED 'U'
+#define TYPE_GET 'G'
+#define TYPE_HEAD 'H'
+#define TYPE_POST 'P'
 
 /**************************** FUNCTION DECLARATION ****************************/
 
 char from_hex(char ch);
-/* Перекодировка из процентной кодировки */
+/* Recoding of interest encoding */
 char *urldecode(char *str);
+int getTypeCode(char *type);
+int parseGet(const char* path, keyvalue *query_string, keyvalue *cookies);
 
 /* end ************************************************ FUNCTION DECLARATION  */
 
 
-
 /********************************** ROUTER CODE *******************************/
 
-int routeQuery(char *type, char *path, char *query, char *cookies){
-    char *request_uri = NULL;
-    char *query_string = NULL;
-    char *query_cookies = NULL;
-    
-        // Parse GET
-       if (strcasecmp(type, "GET") == 0) {
-            query_string = getenv("QUERY_STRING");
-            request_uri = getenv("DOCUMENT_URI");
-            request_uri++;
-            //Processing query
-            printf("TEST_2, %s and %s\n", request_uri, query_string);
-            //contrDebug(request_uri, query_string);
-            return 0;
-        }
+int routeQuery(char *type, char *path, char *query, char *cookies) {
+    char *request_uri = path;
+    keyvalue *query_string = parseKeyValueString(query, '&', '=');
+    keyvalue *query_cookies = parseKeyValueString(cookies, '&', '=');
+
+    switch (getTypeCode(type)) {
+        case TYPE_GET:
+            // Parse GET method
+#ifdef DEBUG
+            //If try path "/debug" and DEBUG enabled..
+            if (strcasecmp(request_uri, "/debug") == 0) {
+                printf("Echo dbg ->\n\n");
+                contrDebug(request_uri, query_string, query_cookies);
+                return 0;
+            } else
+#endif
+                //parseGet(request_uri, query_string, query_cookies);
+            break;
+        case TYPE_HEAD:
+            // Parse HEAD mathod (as GET, but only headers answer)
+            break;
+        case TYPE_POST:
+            // Parse POST method
+            break;
+        default:
+            break;
+    }
     return 1;
 };
 
-int parseGet() {
-    char *query_string;
-    char *request_uri;
-    
-    // Parse GET
-    if (strcasecmp(getenv("REQUEST_METHOD"), "GET") == 0) {
-        query_string = getenv("QUERY_STRING");
-        request_uri = getenv("DOCUMENT_URI");
-        request_uri++;
-        //Processing query
+int getTypeCode(char *type){
+    if(strcasecmp(type, "GET") == 0){
+        return TYPE_GET;
+    } else if(strcasecmp(type, "HEAD") == 0){
+        return TYPE_HEAD;
+    } else if(strcasecmp(type, "POST") == 0){
+        return TYPE_POST;
     }
+    return TYPE_UNDEFINED;
+}
+
+int parseGet(const char* path, keyvalue *query_string, keyvalue *cookies) {
+    
+    path++;
 
     // If "query string" is present, parse as functions of modules
-    if (query_string != NULL && strlen(query_string) > 0) {
+    if (query_string != NULL) {
         //FIXME Testing new function
-        char *return_name = search_module(request_uri);
+        char *return_name = search_module(path);
         if (return_name != NULL) {
             //continue;
         }
         //FIXME End of test
         int *tmp = (int *) (&section_get[0]);
         do {
-            if (strncmp(request_uri, section_get->name, strlen(section_get->name)) == 0) {
+            if (strncmp(path, section_get->name, strlen(section_get->name)) == 0) {
                 printf("Content-Type: %s\n\n", section_get->doctype);
-                contrModule(section_get, urldecode(query_string));
+                contrModule(section_get, query_string, cookies);
                 break;
             }
             //Сместим уазатель на один элемент вперёд, чтобы не вылетать при первой же итерации
@@ -70,17 +92,16 @@ int parseGet() {
         } while ((int *) (&section_get[0]) != tmp);
     }        //При пустом q_s делаем обработку запроса по URI 
     else {
-        char* cookie_str = cookie_str = getenv("HTTP_COOKIE");
         //Запрос внутренних страниц
-        if (strlen(request_uri) > 1) {
+        if (strlen(path) > 1) {
             printf("Content-Type: text/html\n\n");
             //dec_str = urldecode(request_uri);
-            contrAdmin(request_uri, cookie_str);
+            contrAdmin("admin", query_string, cookies);
         }            //Наполнение "главной".
         else {
 
             printf("Content-Type: text/html\n\n");
-            contrAdmin("get_default", cookie_str);
+            contrAdmin("get_default", query_string, cookies);
         }
     }
     return 0;
@@ -115,30 +136,37 @@ char *urldecode(char *str) {
 }
 
 keyvalue* parseKeyValueString(char* string, char delimiter_key, char delimiter_value){
-    const char delimetr_key_value[]={delimiter_key, delimiter_value, '\0'};
+    char delimiter_key_value[3];
     int max_params = 1024;
     keyvalue *res;
         
+    delimiter_key_value[0] = delimiter_key;
+    delimiter_key_value[1] = delimiter_value;
+    delimiter_key_value[2] = '\0';
+    
     if (string != NULL && strlen(string) > 0) {
+        char *pt = strtok(string, delimiter_key_value);
 
-        char *pt = strtok(string, delimetr_key_value);
-
-        res = (keyvalue*) malloc(sizeof (struct keyvalue));
+        res = (keyvalue*) malloc(sizeof(struct keyvalue));
         res[0].name = (char *) malloc(strlen(pt) + 1);
         strcpy(res[0].name, pt);
         res[0].value = (char *) malloc(strlen(pt) + 1);
-        pt = strtok(NULL, delimetr_key_value);
+        pt = strtok(NULL, delimiter_key_value);
         strcpy(res[0].value, pt);
 
-         pt = strtok(NULL, delimetr_key_value);
-        for (int i = 0; pt != NULL && i < (max_params - 1); i++, pt = strtok(NULL, delimetr_key_value)) {
+        pt = strtok(NULL, delimiter_key_value);
+        int i = 0;
+        for (i = 0; pt != NULL && i < (max_params - 1); i++, pt = strtok(NULL, delimiter_key_value)) {
             res = (keyvalue*) realloc(res, sizeof (struct keyvalue)*(2 + i));
             res[i+1].name = (char *) malloc(strlen(pt) + 1);
             strcpy(res[i+1].name, pt);
             res[i+1].value = (char *) malloc(strlen(pt) + 1);
-            pt = strtok(NULL, delimetr_key_value);
+            pt = strtok(NULL, delimiter_key_value);
             strcpy(res[i+1].value, pt);
         };
+        res = (keyvalue*) realloc(res, sizeof (struct keyvalue)*(2 + i));
+        res[i+1].name = NULL;
+        res[i+1].value = NULL;
      return  res;  
     }
     return NULL;

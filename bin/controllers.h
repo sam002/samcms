@@ -37,6 +37,13 @@ typedef struct section{
 	struct commands *commands;	/* Pointer on array commands from section */
 } section; // structure of commands
 
+// Set structure for all parametrs
+typedef struct keyvalue{
+    char *name;
+    char *value;
+} keyvalue;
+
+#define NOT_NULL_KEYVALUE(KV)  ( KV.name!=NULL) ? ( KV.value!=NULL ) : 0
 
 /****************************** GLOBAL VARIABLES ******************************/
 
@@ -54,9 +61,9 @@ PGresult *res;
 /**************************** FUNCTION DECLARATION ****************************/
 
 char* search_module(const char *uri_path);
-void contrDebug(const char* title, const char* data);
-void contrAdmin(char* uri_path, char* cookie_str);
-void contrModule (volatile struct section *section, char *query_string);
+void contrDebug(const char* title, keyvalue *query_string, keyvalue *cookies);
+void contrAdmin(char* uri_path, keyvalue *query_string, keyvalue *cookies);
+void contrModule (volatile struct section *section, keyvalue *query_string, keyvalue *cookies);
 
 /* end ************************************************ FUNCTION DECLARATION  */
 
