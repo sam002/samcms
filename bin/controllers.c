@@ -98,10 +98,10 @@ hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #0
         printf("<hr><center><b>[%s]</b>=>\"%s\"</center>\n", query_string[i].name, query_string[i].value);
     }
 
-    printf("<h2>COOKIES</h2>");
+    /*printf("<h2>COOKIES</h2>");
     for (int i = 0; NOT_NULL_KEYVALUE(cookies[i]); i++) {
         printf("<hr><center><b>[%s]</b>=>\"%s\"</center>\n", cookies[i].name, cookies[i].value);
-    }
+    }*/
 
     printf("<hr><footer>%s</footerr></body>\
 			</html>\n\n", VERSION);

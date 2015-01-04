@@ -30,6 +30,7 @@ int parseGet(const char* path, keyvalue *query_string, keyvalue *cookies);
 int routeQuery(char *type, char *path, char *query, char *cookies) {
     char *request_uri = path;
     keyvalue *query_string = parseKeyValueString(query, '&', '=');
+
     keyvalue *query_cookies = parseKeyValueString(cookies, '&', '=');
 
     switch (getTypeCode(type)) {
@@ -135,41 +136,47 @@ char *urldecode(char *str) {
 	return buf;
 }
 
-keyvalue* parseKeyValueString(char* string, char delimiter_key, char delimiter_value){
+keyvalue* parseKeyValueString(char* string, char delimiter_key, char delimiter_value) {
     char delimiter_key_value[3];
     int max_params = 1024;
+    int i = 0;
     keyvalue *res;
-        
+
     delimiter_key_value[0] = delimiter_key;
     delimiter_key_value[1] = delimiter_value;
     delimiter_key_value[2] = '\0';
+
+    res = (keyvalue*) malloc(sizeof (struct keyvalue));
     
     if (string != NULL && strlen(string) > 0) {
         char *pt = strtok(string, delimiter_key_value);
+        
+        //printf("\n\ntest %i,[%s]=>%s, %p=\"\"\n\n", i, res[i].name, res[i].value, pt); exit(0);
+            
+        while(pt != NULL && i <= (max_params)){
+            res = (keyvalue*) realloc(res, sizeof (struct keyvalue)*(i+2));
+            res[i].name = (char *) malloc(strlen(pt) + 1);
+            strcpy(res[i].name, pt);
 
-        res = (keyvalue*) malloc(sizeof(struct keyvalue));
-        res[0].name = (char *) malloc(strlen(pt) + 1);
-        strcpy(res[0].name, pt);
-        res[0].value = (char *) malloc(strlen(pt) + 1);
-        pt = strtok(NULL, delimiter_key_value);
-        strcpy(res[0].value, pt);
-
-        pt = strtok(NULL, delimiter_key_value);
-        int i = 0;
-        for (i = 0; pt != NULL && i < (max_params - 1); i++, pt = strtok(NULL, delimiter_key_value)) {
-            res = (keyvalue*) realloc(res, sizeof (struct keyvalue)*(2 + i));
-            res[i+1].name = (char *) malloc(strlen(pt) + 1);
-            strcpy(res[i+1].name, pt);
-            res[i+1].value = (char *) malloc(strlen(pt) + 1);
             pt = strtok(NULL, delimiter_key_value);
-            strcpy(res[i+1].value, pt);
-        };
-        res = (keyvalue*) realloc(res, sizeof (struct keyvalue)*(2 + i));
-        res[i+1].name = NULL;
-        res[i+1].value = NULL;
-     return  res;  
+            if(pt == NULL){
+                break; 
+            }
+        
+            res[i].value = (char *) malloc(strlen(pt) + 1);
+            strcpy(res[i].value, pt);
+
+            pt = strtok(NULL, delimiter_key_value);
+            i++;
+         
+            //printf("\n\ntest %i,[%s]=>%s\n\n", i, res[i].name, res[i].value); exit(0);
+        }
     }
-    return NULL;
+    
+    res[i].name = NULL;
+    
+    res[i].value = NULL;
+    return res;
 }
 
 int parsePost() {

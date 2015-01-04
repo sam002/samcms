@@ -46,7 +46,6 @@ int bindFCGI() {
         request_cookies = getenv("HTTP_COOKIE");
         
         printf("X-Powered-by:%s",VERSION);
-
         //Processing query
         routeQuery(query_type, request_uri, query_string, request_cookies);
         /*if(routeQuery(query_type, request_uri, (char *) &query_string, (char *)&request_cookies) != 1){
