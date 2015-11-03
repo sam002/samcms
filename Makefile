@@ -4,7 +4,7 @@ SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:%.c=%.o)
 PREFIX=./develop
 
-CFLAGS += -O3 -std=c99 -I/usr/include/postgresql -L/usr/lib/postgresql/9.[2,3,4]/lib -Wall
+CFLAGS += -O3 -std=c99 -I/usr/include/postgresql -L/usr/lib/postgresql/9.[2,3,4,5]/lib -Wall
 LDFLAGS += -lpq -lfcgi
 
 install:

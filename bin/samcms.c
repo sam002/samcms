@@ -36,7 +36,7 @@ static int issetugid() {
 #endif
 
 #if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
-# define USE_IPV6
+#define USE_IPV6
 #endif
 
 #ifdef USE_IPV6

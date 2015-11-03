@@ -12,7 +12,7 @@ Now debugging code... Step by step
 
 Add and edit to nginx config form ./samcms/tools/samcms-nginx
 ```bash
-sudo cp ./samcms/tools/samcms-nginx /etc/nginx/sites-avalible/
+sudo cp ./tools/samcms-nginx /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/samcms-nginx /etc/nginx/sites-enabled/
 #nano /etc/nginx/sites-available/samcms-nginx
 sudo nginx -t
@@ -21,7 +21,7 @@ service nginx restart
 Install dependency packages (example tested only for kubuntu 14.10)
 ```bash
 sudo apt-get install postgresql-9.4 postgresql-client-9.4 postgresql-contrib-9.4\
-  libpq-dev. libfcgi0ldbl make gcc
+  libpq-dev libfcgi0ldbl libfcgi-dev make gcc
 ```
 
 ###Run it!
